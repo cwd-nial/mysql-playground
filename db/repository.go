@@ -21,11 +21,14 @@ type Config struct {
 }
 
 type Repository interface {
-	Insert(e Entity) (operation string, rowsAffected int64)
-	GetAll() (operation string, entities []Entity)
-	GetDuplicatesJoin() (operation string, entities []Entity)
-	GetDuplicatesCte() (operation string, entities []Entity)
-	Truncate() (operation string, rowsAffected int64)
+	UseDatabase()
+	Insert(e Entity) (rowsAffected int)
+	GetAll() (entities []Entity)
+	GetDuplicatesJoin() (entities []Entity)
+	GetDuplicatesCte() (entities []Entity)
+	DeleteDuplicatesJoin() (rowsAffected int)
+	DeleteDuplicatesCte() (rowsAffected int)
+	Truncate() (rowsAffected int)
 }
 
 type repository struct {
@@ -54,50 +57,81 @@ func NewRepository(c Config) Repository {
 	}
 }
 
-func (r repository) Insert(e Entity) (operation string, rowsAffected int64) {
+func (r repository) UseDatabase() {
+	op := "UseDatabase"
+	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/use-database.sql", r.path)); err == nil {
+		r.exec(op, string(query))
+	}
+}
+
+func (r repository) Insert(e Entity) (rowsAffected int) {
 	op := "Insert"
 	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/insert.sql", r.path)); err == nil {
 		res, err := r.db.ExecContext(context.TODO(), string(query), e.MessageType, e.SpaceType, e.ReceiverId, e.LogData, e.CreateTime)
 		if err != nil {
-			r.logger.Error(fmt.Sprintf("%s DB query failed!", operation))
-			return op, 0
+			r.logger.Error(fmt.Sprintf("%s DB query failed!", op))
+			return 0
 		}
 		rows, _ := res.RowsAffected()
 
-		return op, rows
+		return int(rows)
 	}
-	return op, 0
+	return 0
 }
 
-func (r repository) GetAll() (operation string, entities []Entity) {
+func (r repository) GetAll() (entities []Entity) {
 	op := "GetAll"
 	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/get-all.sql", r.path)); err == nil {
-		return r.execQuery(op, string(query))
+		return r.queryContext(op, string(query))
 	}
-	return op, nil
+	return nil
 }
 
-func (r repository) GetDuplicatesJoin() (operation string, entities []Entity) {
+func (r repository) GetDuplicatesJoin() (entities []Entity) {
 	op := "GetDuplicatesJoin"
 	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/get-duplicates-join.sql", r.path)); err == nil {
-		return r.execQuery(op, string(query))
+		return r.queryContext(op, string(query))
 	}
-	return op, nil
+	return nil
 }
 
-func (r repository) GetDuplicatesCte() (operation string, entities []Entity) {
+func (r repository) GetDuplicatesCte() (entities []Entity) {
 	op := "GetDuplicatesCte"
 	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/get-duplicates-cte.sql", r.path)); err == nil {
-		return r.execQuery(op, string(query))
+		return r.queryContext(op, string(query))
 	}
-	return op, nil
+	return nil
 }
 
-func (r repository) execQuery(op, sql string) (operation string, entities []Entity) {
+func (r repository) DeleteDuplicatesJoin() (rowsAffected int) {
+	op := "DeleteDuplicatesJoin"
+	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/delete-duplicates-join.sql", r.path)); err == nil {
+		return r.execContext(op, string(query))
+	}
+	return 0
+}
+
+func (r repository) DeleteDuplicatesCte() (rowsAffected int) {
+	op := "DeleteDuplicatesCte"
+	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/delete-duplicates-cte.sql", r.path)); err == nil {
+		return r.execContext(op, string(query))
+	}
+	return 0
+}
+
+func (r repository) Truncate() (rowsAffected int) {
+	op := "Truncate"
+	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/truncate.sql", r.path)); err == nil {
+		return r.execContext(op, string(query))
+	}
+	return 0
+}
+
+func (r repository) queryContext(op, sql string) (entities []Entity) {
 	rows, err := r.db.QueryContext(context.TODO(), sql)
 	if err != nil {
-		r.logger.Error(fmt.Sprintf("%s DB query failed!", operation))
-		return op, nil
+		r.logger.Error(fmt.Sprintf("%s DB query failed!", op))
+		return nil
 	}
 	var res []Entity
 	for rows.Next() {
@@ -105,25 +139,28 @@ func (r repository) execQuery(op, sql string) (operation string, entities []Enti
 		err := rows.Scan(&e.Id, &e.MessageType, &e.SpaceType, &e.ReceiverId, &e.LogData, &e.CreateTime)
 		if err != nil {
 			r.logger.Error(err)
-			return op, nil
+			return nil
 		}
 
 		res = append(res, e)
 	}
 
-	return op, res
+	return res
 }
 
-func (r repository) Truncate() (operation string, rowsAffected int64) {
-	op := "Truncate"
-	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/truncate.sql", r.path)); err == nil {
-		res, err := r.db.ExecContext(context.TODO(), string(query))
-		if err != nil {
-			r.logger.Error(fmt.Sprintf("%s DB query failed!", op))
-		}
-		rows, _ := res.RowsAffected()
-
-		return op, rows
+func (r repository) execContext(op, sql string) (rowsAffected int) {
+	res, err := r.db.ExecContext(context.TODO(), sql)
+	if err != nil {
+		r.logger.Error(fmt.Sprintf("%s DB query failed!", op))
 	}
-	return op, 0
+	rows, _ := res.RowsAffected()
+
+	return int(rows)
+}
+
+func (r repository) exec(op, sql string) {
+	_, err := r.db.Exec(sql)
+	if err != nil {
+		r.logger.Error(fmt.Sprintf("%s DB query failed!", op))
+	}
 }

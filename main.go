@@ -28,9 +28,7 @@ func main() {
 	printMessages(repository.GetDuplicatesCte())
 }
 
-func printMessages(op string, messages []db.Entity) {
-	fmt.Println("\n=============================================================================")
-	fmt.Println(op)
+func printMessages(messages []db.Entity) {
 	fmt.Println("-----------------------------------------------------------------------------")
 	for _, v := range messages {
 		fmt.Println(v)

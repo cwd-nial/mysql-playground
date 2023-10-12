@@ -36,6 +36,7 @@ func newFramework(t *testing.T) Framework {
 			Logger:   logrus.New(),
 		}),
 	}
+	fr.repository.UseDatabase()
 	fr.tearDownDb()
 	fr.initDb()
 

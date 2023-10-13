@@ -59,14 +59,14 @@ func NewRepository(c Config) Repository {
 
 func (r repository) UseDatabase() {
 	op := "UseDatabase"
-	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/use-database.sql", r.path)); err == nil {
+	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/base/use-database.sql", r.path)); err == nil {
 		r.exec(op, string(query))
 	}
 }
 
 func (r repository) Insert(e Entity) (rowsAffected int) {
 	op := "Insert"
-	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/insert.sql", r.path)); err == nil {
+	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/base/insert.sql", r.path)); err == nil {
 		res, err := r.db.ExecContext(context.TODO(), string(query), e.MessageType, e.SpaceType, e.ReceiverId, e.LogData, e.CreateTime)
 		if err != nil {
 			r.logger.Error(fmt.Sprintf("%s DB query failed!", op))
@@ -81,7 +81,7 @@ func (r repository) Insert(e Entity) (rowsAffected int) {
 
 func (r repository) GetAll() (entities []Entity) {
 	op := "GetAll"
-	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/get-all.sql", r.path)); err == nil {
+	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/base/get-all.sql", r.path)); err == nil {
 		return r.queryContext(op, string(query))
 	}
 	return nil
@@ -121,7 +121,7 @@ func (r repository) DeleteDuplicatesCte() (rowsAffected int) {
 
 func (r repository) Truncate() (rowsAffected int) {
 	op := "Truncate"
-	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/truncate.sql", r.path)); err == nil {
+	if query, err := os.ReadFile(fmt.Sprintf("%s/sql/base/truncate.sql", r.path)); err == nil {
 		return r.execContext(op, string(query))
 	}
 	return 0

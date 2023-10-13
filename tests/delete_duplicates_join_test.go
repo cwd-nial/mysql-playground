@@ -9,14 +9,14 @@ func TestDeleteDuplicatesJoin(t *testing.T) {
 	fr := newFramework(t)
 
 	startMessages := fr.repository.GetAll()
-	assert.Equal(t, 5, len(startMessages))
+	assert.Equal(t, 10, len(startMessages))
 
 	duplicates := fr.repository.GetDuplicatesJoin()
-	assert.Equal(t, 2, len(duplicates))
+	assert.Equal(t, 5, len(duplicates))
 
 	affectedRows := fr.repository.DeleteDuplicatesJoin()
-	assert.Equal(t, 2, affectedRows)
+	assert.Equal(t, 5, affectedRows)
 
 	finalMessages := fr.repository.GetAll()
-	assert.Equal(t, 3, len(finalMessages))
+	assert.Equal(t, 5, len(finalMessages))
 }

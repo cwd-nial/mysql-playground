@@ -23,14 +23,20 @@ func main() {
 		Logger:   logger,
 	})
 
+	fmt.Println("\nget all entries")
 	printMessages(repository.GetAll())
+
+	fmt.Println("\nget duplicates by join")
 	printMessages(repository.GetDuplicatesJoin())
+
+	fmt.Println("\nget duplicates with CTE")
 	printMessages(repository.GetDuplicatesCte())
 }
 
 func printMessages(messages []db.Entity) {
-	fmt.Println("-----------------------------------------------------------------------------")
+	fmt.Println("=============================================================================")
 	for _, v := range messages {
 		fmt.Println(v)
 	}
+	fmt.Println("-----------------------------------------------------------------------------")
 }

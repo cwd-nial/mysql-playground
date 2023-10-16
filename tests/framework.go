@@ -52,6 +52,10 @@ func (fr *Framework) initDb() {
 	lines, err := csv.NewReader(f).ReadAll()
 	for _, v := range lines {
 		receiverId, _ := strconv.Atoi(v[2])
+		var logData *string
+		if v[3] != "" {
+			logData = &v[3]
+		}
 		t, err := time.Parse(mysqlTime, v[4])
 		if err != nil {
 			panic("failed to parse the mysql value from the CSV file")
@@ -60,7 +64,7 @@ func (fr *Framework) initDb() {
 			MessageType: v[0],
 			SpaceType:   v[1],
 			ReceiverId:  uint64(receiverId),
-			LogData:     v[3],
+			LogData:     logData,
 			CreateTime:  sql.NullTime{t, true},
 		})
 	}

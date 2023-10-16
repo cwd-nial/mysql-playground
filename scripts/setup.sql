@@ -42,3 +42,13 @@ INSERT INTO playground.message_history_log (message_type, space_type, receiver_i
 VALUES ('INFO', 'REALITY', 511199, 'everything tastes like chicken...', '2023-11-04 22:01:58');
 INSERT INTO playground.message_history_log (message_type, space_type, receiver_id, log_data, create_time)
 VALUES ('CRITICAL', 'REALITY', 6641334, 'last transmission... signal lost_', '2023-11-15 09:28:50');
+INSERT INTO playground.message_history_log (message_type, space_type, receiver_id, create_time)
+VALUES ('CRITICAL', 'REALITY', 6641334, '2023-11-15 09:31:02');
+INSERT INTO playground.message_history_log (message_type, space_type, receiver_id, create_time)
+VALUES ('CRITICAL', 'REALITY', 6641334, '2023-11-15 09:31:02');
+INSERT INTO playground.message_history_log (message_type, space_type, receiver_id, create_time)
+VALUES ('CRITICAL', 'REALITY', 6641334, '2023-11-15 09:31:02');
+INSERT INTO playground.message_history_log (message_type, space_type, receiver_id, create_time)
+VALUES ('CRITICAL', 'REALITY', 6641334, '2023-11-15 09:31:02');
+INSERT INTO playground.message_history_log (message_type, space_type, receiver_id, create_time)
+VALUES ('CRITICAL', 'REALITY', 6641334, '2023-11-15 09:31:02');

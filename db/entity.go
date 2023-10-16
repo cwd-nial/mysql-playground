@@ -9,6 +9,6 @@ type Entity struct {
 	MessageType string       `db:"message_type"`
 	SpaceType   string       `db:"space_type"`
 	ReceiverId  uint64       `db:"receiver_id"`
-	LogData     string       `db:"log_data"`
+	LogData     *string      `db:"log_data,omitempty"`
 	CreateTime  sql.NullTime `db:"create_time"`
 }
